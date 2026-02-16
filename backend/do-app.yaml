@@ -1,0 +1,13 @@
+name: contract-shield-api
+services:
+  - name: api
+    environment_slug: python
+    source_dir: backend
+    run_command: uvicorn app.main:app --host 0.0.0.0 --port 8080
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    github:
+      branch: main
+      deploy_on_push: true
+      repo: YOUR_GITHUB_ORG/Contract-sheild

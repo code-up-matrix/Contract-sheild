@@ -1,22 +1,59 @@
-# Contract Shield — Codex Agent Instructions
+# Contract Shield MVP
 
-## Goal (MVP Day 1)
-Build a monorepo with:
-- apps/api: FastAPI service exposing:
-  - GET /health -> {ok:true}
-  - POST /upload (multipart file PDF/DOCX) -> {doc_id, filename, chars, preview_text}
-- apps/web: Next.js app that uploads a PDF/DOCX and displays preview_text in the UI.
+Contract Shield is a minimal two-service app for freelancers to upload contracts and get heuristic legal-risk guidance.
 
-## Constraints
-- Keep it minimal: no DB, no auth, no Stripe yet.
-- Must run locally with two commands (api + web).
-- Must be deployable to DigitalOcean App Platform using Dockerfiles.
-- Add clear README with env vars.
+## What it does
 
-## Acceptance Criteria
-- `curl <api>/health` returns ok:true
-- Uploading a sample PDF/DOCX returns JSON with preview_text (first ~800 chars)
-- Web UI can upload and show preview in the same page
-- CORS allowed from WEB_ORIGIN
-- Includes Dockerfile for api
-- Web can be deployed as Node build/run# Contract-sheild
+- Upload PDF or DOCX contracts in a Next.js UI.
+- FastAPI extracts text using:
+  - `pdfplumber` for PDF
+  - `python-docx` for DOCX
+- Returns:
+  - risk score (0-100)
+  - key red flags
+  - plain-English explanations
+  - negotiation tips
+  - draft negotiation email
+- Highlights these risk categories:
+  - unlimited liability
+  - broad indemnity
+  - non-compete clauses
+- Summarizes extracted text in the UI.
+
+> This is heuristic analysis and not legal advice.
+
+## Project structure
+
+- `frontend/` - Next.js MVP web app
+- `backend/` - FastAPI analysis API
+
+## Local development
+
+### 1) Start API
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+### 2) Start web app
+
+```bash
+cd frontend
+npm install
+NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev
+```
+
+Open `http://localhost:3000`.
+
+## Deploy to DigitalOcean App Platform
+
+Deploy as **separate services**:
+
+1. API service from `backend/do-app.yaml`
+2. Web service from `frontend/do-app.yaml`
+
+Update `github.repo` and the frontend `NEXT_PUBLIC_API_URL` value before deploy.
